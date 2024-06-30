@@ -1,0 +1,13 @@
+{
+    "time_zone": 0,
+    "completed_sessions": 0,
+    "failed_sessions": 0,
+    "points": 0,
+    "partner_id": 0,
+    "guild_id": -1,
+    "default_reminder_ahead": 1,
+    "default_duration": 30,
+    "months": {},
+    "task_list": [],
+    "friends": {}
+}
