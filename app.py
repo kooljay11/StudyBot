@@ -20,7 +20,7 @@ async def sendReminder():
             user = await get_userinfo(user_id)
             now = datetime.now()
 
-            for task in user["tasklist"]:
+            for task in user["task_list"]:
                 if task["reminder_ahead"] + task["datetime"] > now:
                     break
                 else:
