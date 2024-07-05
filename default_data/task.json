@@ -1,8 +1,8 @@
 {
     "datetime": "",
-    "reminder_ahead": "",
+    "reminder_ahead_mins": 1,
     "server_id": 0,
-    "duration": 0,
+    "duration_mins": 0,
     "reminder": true,
     "started": "",
     "ended": ""
