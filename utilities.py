@@ -3,11 +3,11 @@ from copy import deepcopy
 import os
 
 
-async def get_default_task_info():
-    with open("./default_data/task_info.json", "r") as file:
-        task_info = json.load(file)
+async def get_default_session():
+    with open("./default_data/session.json", "r") as file:
+        session = json.load(file)
     
-    return task_info
+    return session
 
 async def get_userinfo(self_user, target):
     if str(target).isnumeric():
@@ -22,6 +22,14 @@ async def get_userinfo(self_user, target):
 async def get_userinfo(user_id):
     with open(f"./data/user_data/{user_id}.json", "r") as file:
         user = json.load(file)
+
+    # Get the default userinfo
+    default_user = await get_default_userinfo()
+
+    for attr, value in default_user.items():
+        if user.get(attr, None) is None:
+            user[attr] = default_user[attr]
+            await save_userinfo(user_id, user)
     
     return user
 
@@ -54,6 +62,13 @@ async def get_serverinfo():
 async def save_serverinfo(server_info):
     with open("./data/server_info.json", "w") as file:
         json.dump(server_info, file, indent=4)
+
+async def create_user_profile(user_id):
+    default_user = await get_default_userinfo()
+
+    await save_userinfo(user_id, default_user)
+
+    return default_user
 
 async def send_message(client, server_id, message):
     try:

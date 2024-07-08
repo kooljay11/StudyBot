@@ -4,6 +4,6 @@
     "server_id": 0,
     "duration_mins": 0,
     "reminder": true,
-    "started": "",
-    "ended": ""
+    "attended_mins": 0,
+    "description": ""
 }
