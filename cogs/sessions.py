@@ -16,9 +16,8 @@ class Sessions(commands.Cog):
         print(f'{__name__} loaded successfully!')
     
     @app_commands.command(name="sessions", description="Lists all sessions scheduled by the user.")
-    async def list_sessions(self, interaction: discord.Interaction, user_id: str = ""):
-        if user_id == "":
-            user_id = interaction.user.id
+    async def list_sessions(self, interaction: discord.Interaction, target: str = ""):
+        user_id = interaction.user.id
 
         # Make sure the user exists
         try:
@@ -27,23 +26,31 @@ class Sessions(commands.Cog):
             await reply(self.client, interaction, f'User not found.')
             return
         
+        if target != user_id and target != "":
+            target_id_nick = await get_id_nickname(self.client, user, target)
+            target_info = await get_userinfo(target_id_nick["id"])
+            user_name = target_id_nick["name"]
+        else:
+            target_info = user
+            user_name = str(await self.client.fetch_user(user_id))
+        
         # Stop if the user has no scheduled sessions
-        if len(user["sessions"]) <= 0:
+        if len(target_info["sessions"]) <= 0:
             await reply(self.client, interaction, f'Session list is empty.')
             return
         
         global_info = await get_globalinfo()
         now = datetime.now()
 
-        message = f'__**Sessions**__'
+        message = f'__**{user_name}\'s Sessions**__'
         
-        for session in user["sessions"]:
+        for session in target_info["sessions"]:
             scheduled_datetime = dateparser.parse(session["datetime"])
 
             duration_hours = int(session["duration_mins"]/60)
             duration_mins = session["duration_mins"]%60
 
-            message += f'\n{user["sessions"].index(session)}: {session["datetime"]} for '
+            message += f'\n{target_info["sessions"].index(session)}: {session["datetime"]} for '
 
             if duration_hours == 0:
                 message += f'{duration_mins} mins '
