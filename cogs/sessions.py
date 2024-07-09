@@ -67,16 +67,8 @@ class Sessions(commands.Cog):
 
             if penalty_cost > 0:
                 message += f'Cancellation penalty: {penalty_cost}.'
-            
-
-
-        
-        
-        
 
         await reply(self.client, interaction, message)
-
-
 
 async def setup(client):
     await client.add_cog(Sessions(client))

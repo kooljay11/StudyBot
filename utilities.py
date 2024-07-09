@@ -1,6 +1,7 @@
 import json
 from copy import deepcopy
 import os
+from datetime import datetime as dt
 
 
 async def get_default_session():
@@ -9,7 +10,8 @@ async def get_default_session():
     
     return session
 
-async def get_userinfo(self_user, target):
+# Cannot name get_userinfo due to no function overloading in Python
+async def get_userinfo_by_nick(self_user, target):
     if str(target).isnumeric():
         target_user_id = target
     else:
@@ -69,6 +71,36 @@ async def create_user_profile(user_id):
     await save_userinfo(user_id, default_user)
 
     return default_user
+
+async def get_nickname(self_user, target_id):
+    for nickname, id in self_user["nicknames"].items():
+        if id == target_id:
+            return nickname
+    
+    return ""
+
+async def get_id_nickname(client, self_user, target: str):
+    if target.isnumeric():
+        target_id = int(target)
+        target_name = await get_nickname(self_user, target_id)
+        if target_name == "":
+            target_name = str(await client.fetch_user(target_id))
+    else:
+        target_id = int(self_user["nicknames"][target])
+        target_name = target
+    
+    return {"id": target_id, "name": target_name}
+
+async def get_current_month(user):
+    now = dt.now()
+    date = now.strftime("%b %Y")
+
+    for month in user["months"]:
+        if month["date"] == date:
+            return month
+    
+    return ""
+
 
 async def send_message(client, server_id, message):
     try:

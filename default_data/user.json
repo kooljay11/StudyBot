@@ -4,7 +4,7 @@
     "default_guild_id": -1,
     "default_reminder_ahead": 1,
     "default_duration": 30,
-    "months": {},
+    "months": [],
     "sessions": [],
     "friends": [],
     "nicknames": {}
