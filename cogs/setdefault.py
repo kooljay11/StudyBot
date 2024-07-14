@@ -52,7 +52,10 @@ class SetDefault(commands.Cog):
         elif mode == "default_guild_id":
             # Make sure it is a valid guild
             try:
-                guild = await self.client.fetch_guild(int(value))
+                if value != "":
+                    guild = await self.client.fetch_guild(int(value))
+                else:
+                    guild = await self.client.fetch_guild(interaction.guild_id)
             except:
                 await reply(self.client, interaction, f'Invalid guild id.')
                 return

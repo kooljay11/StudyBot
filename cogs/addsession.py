@@ -40,6 +40,9 @@ class AddSession(commands.Cog):
         # Get the current server id
         try:
             server_id = interaction.guild_id
+            if user["default_guild_id"] < 0:
+                user["default_guild_id"] = server_id
+                await save_userinfo(user_id,user)
         except:
             if user["default_guild_id"] > 0:
                 try: 

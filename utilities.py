@@ -55,14 +55,20 @@ async def save_globalinfo(global_info):
     with open("./data/global_info.json", "w") as file:
         json.dump(global_info, file, indent=4)
 
+async def get_default_server():
+    with open("./default_data/server.json", "r") as file:
+        server = json.load(file)
+    
+    return server
+
 async def get_serverinfo():
-    with open("./data/server_info.json", "r") as file:
+    with open("./data/servers.json", "r") as file:
         server_info = json.load(file)
     
     return server_info
 
 async def save_serverinfo(server_info):
-    with open("./data/server_info.json", "w") as file:
+    with open("./data/servers.json", "w") as file:
         json.dump(server_info, file, indent=4)
 
 async def create_user_profile(user_id):
@@ -101,12 +107,20 @@ async def get_current_month(user):
     
     return ""
 
+async def get_default_month():
+    with open("./default_data/month.json", "r") as file:
+        month = json.load(file)
+    
+    return month
 
 async def send_message(client, server_id, message):
     try:
+        print(f'Sending message to {server_id}')
         server_info = await get_serverinfo()
+        print(f'int(server_info[server_id]["reminder_channel_id"]): {server_info[str(server_id)]["reminder_channel_id"]}')
 
-        channel = client.fetch_channel(server_info[server_id]["reminder_channel_id"])
+        channel = await client.fetch_channel(int(server_info[str(server_id)]["reminder_channel_id"]))
+        print(f'channel.id: {channel.id}')
 
         if len(message) <= 2000:
             await channel.send(message)

@@ -1,4 +1,5 @@
 {
+    "points_per_min": 1,
     "cancellation_penalty": [
         {
             "hrs_limit": 1,
@@ -146,5 +147,6 @@
         "Lv": 24000,
         "Ts": 24500,
         "Og": 25000
-    }
+    },
+    "new_day_delay": 0
 }
