@@ -16,19 +16,7 @@ class AddSession(commands.Cog):
         print(f'{__name__} loaded successfully!')
     
     @app_commands.command(name="addsession", description="Schedules a new session.")
-    async def add_session(self, interaction: discord.Interaction, date: str, duration_hours: int = 0, duration_mins: int = 0, reminder_mins: int = -1, description: str = ""):
-        try:
-            session_date = dateparser.parse(date)
-        except:
-            await reply(self.client, interaction, f'Couldn\'t parse that date, sorry. Please check the external module documentation for further information: https://github.com/scrapinghub/dateparser')
-            return
-        
-        # Prevent the date being in the past
-        now = datetime.now()
-        if now >= session_date:
-            await reply(self.client, interaction, f'You must schedule a session in the future.')
-            return
-        
+    async def add_session(self, interaction: discord.Interaction, date: str, duration_hours: int = 0, duration_mins: int = 0, reminder_mins: int = -1, description: str = ""):        
         # Add a new user profile if necessary
         user_id = interaction.user.id
         try:
@@ -36,6 +24,22 @@ class AddSession(commands.Cog):
         except:
             await create_user_profile(user_id)
             user = await get_userinfo(user_id)
+
+        try:
+            session_date_display = dateparser.parse(date)
+            session_date = await current_to_utc(session_date_display, user["timezone"])
+            #Convert from current to utc***************************************
+        except:
+            await reply(self.client, interaction, f'Couldn\'t parse that date, sorry. Please check the external module documentation for further information: https://github.com/scrapinghub/dateparser')
+            return
+        
+        # Prevent the date being in the past
+        now = datetime.now(UTC).replace(tzinfo=None)
+        #Get this time in utc***************************************
+        if now >= session_date:
+            await reply(self.client, interaction, f'You must schedule a session in the future.')
+            return
+        #print(f'now: {now}')
         
         # Get the current server id
         try:
@@ -95,7 +99,7 @@ class AddSession(commands.Cog):
         # Save changes
         await save_userinfo(user_id, user)
         
-        session_date_formatted = session_date.strftime("%a, %b %d, %Y, %I:%M %p")
+        session_date_formatted = session_date_display.strftime("%a, %b %d, %Y, %I:%M %p")
         duration_hours = int(session["duration_mins"]/60)
         duration_mins = session["duration_mins"]%60
 

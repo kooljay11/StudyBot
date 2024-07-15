@@ -34,7 +34,7 @@ class CancelSession(commands.Cog):
         # Stop if the user doesn't have enough points to pay for that
         global_info = await get_globalinfo()
 
-        now = datetime.now()
+        now = datetime.now(UTC).replace(tzinfo=None)
         scheduled_datetime = dateparser.parse(user["sessions"][index]["datetime"])
 
         current_delta = scheduled_datetime - now
@@ -63,7 +63,9 @@ class CancelSession(commands.Cog):
         # Save changes
         await save_userinfo(user_id, user)
         
-        session_date_formatted = dateparser.parse(cancelled_session["datetime"]).strftime("%a, %b %d, %Y, %I:%M %p")
+        scheduled_datetime_display = await utc_to_current(dateparser.parse(cancelled_session["datetime"]), user["timezone"])
+        session_date_formatted = scheduled_datetime_display.strftime("%a, %b %d, %Y, %I:%M %p")
+        #Convert from utc to current***************************************
         duration_hours = int(cancelled_session["duration_mins"]/60)
         duration_mins = cancelled_session["duration_mins"]%60
 

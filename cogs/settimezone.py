@@ -52,30 +52,35 @@ class SetTimeZone(commands.Cog):
     # UTC -11 regions of US Minor Outlying Islands and 2 more	-11
     # UTC -12 regions of US Minor Outlying Islands	-12
 
-    @app_commands.command(name="gettimezone", description="OBSOLETE: Get the current time zone from your computer.")
-    async def get_timezone(self, interaction: discord.Interaction):
-        now = datetime.now()
-        utc_now = datetime.now(timezone.utc)
-        tz_now = utc_now.astimezone()
+    # @app_commands.command(name="gettimezone", description="OBSOLETE: Get the current time zone from your computer.")
+    # async def get_timezone(self, interaction: discord.Interaction):
+    #     now = datetime.now()
+    #     utc_now = datetime.now(timezone.utc)
+    #     tz_now = utc_now.astimezone()
 
-        message = f'now: {now}\nutc_now: {utc_now}\ntz_now: {tz_now}'
-        await reply(self.client, interaction, message)
+    #     message = f'now: {now}\nutc_now: {utc_now}\ntz_now: {tz_now}'
+    #     await reply(self.client, interaction, message)
 
     
-    @app_commands.command(name="settimezone", description="OBSOLETE: Set your time zone.")
+    @app_commands.command(name="settimezone", description="Set your time zone.")
     async def set_timezone(self, interaction: discord.Interaction, utc_offset: float):
-        delta = timedelta(hours = utc_offset)
-        tz = timezone(delta)
+        # Add a new user profile if necessary
+        user_id = interaction.user.id
+        try:
+            user = await get_userinfo(user_id)
+        except:
+            await create_user_profile(user_id)
+            user = await get_userinfo(user_id)
+        
+        user["timezone"] = utc_offset
+
         utc_now = datetime.now(timezone.utc)
         utc_string = utc_now.strftime("%a, %b %d, %Y, %I:%M %p")
 
-        tz_now = datetime.now(tz)
+        tz_now = await utc_to_current(utc_now, utc_offset)
         tz_string = tz_now.strftime("%a, %b %d, %Y, %I:%M %p")
-
-        now = datetime.now()
-        now_string = now.strftime("%a, %b %d, %Y, %I:%M %p")
         
-        message = f'UTC time: {utc_string}\nTZ time: {tz_string}\nNow: {now_string}'
+        message = f'UTC time: {utc_string}\nYour time: {tz_string}'
         await reply(self.client, interaction, message)
 
 

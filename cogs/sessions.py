@@ -40,17 +40,20 @@ class Sessions(commands.Cog):
             return
         
         global_info = await get_globalinfo()
-        now = datetime.now()
+        now = datetime.now(UTC).replace(tzinfo=None)
 
         message = f'__**{user_name}\'s Sessions**__'
         
         for session in target_info["sessions"]:
             scheduled_datetime = dateparser.parse(session["datetime"])
+            scheduled_datetime_display = await utc_to_current(scheduled_datetime, user["timezone"])
+            formatted_scheduled_datetime = scheduled_datetime_display.strftime("%a, %b %d, %Y, %I:%M %p")
+            #Convert from utc to current***************************************
 
             duration_hours = int(session["duration_mins"]/60)
             duration_mins = session["duration_mins"]%60
 
-            message += f'\n{target_info["sessions"].index(session)}: {session["datetime"]} for '
+            message += f'\n{target_info["sessions"].index(session)}: {formatted_scheduled_datetime} for '
 
             if duration_hours == 0:
                 message += f'{duration_mins} mins '

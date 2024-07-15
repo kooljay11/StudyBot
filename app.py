@@ -16,10 +16,11 @@ client = commands.Bot(command_prefix="/", intents=discord.Intents.all())
 
 @tasks.loop(minutes=1)
 async def sendReminder():
-    now = datetime.datetime.now()
+    now = datetime.datetime.now(datetime.UTC).replace(tzinfo=None)
     servers = await get_serverinfo()
     global_info = await get_globalinfo()
     #print(f'Sending reminders: {now}')
+    await send_console_message(client, f'Sending reminders: {now}')
     for filename in os.listdir("./data/user_data"):
         if filename.endswith(".json"):
             user_id = os.path.splitext(filename)[0]
@@ -31,11 +32,12 @@ async def sendReminder():
                 session = user["sessions"][index]
 
                 scheduled_time = dateparser.parse(session["datetime"])
-                #print(f'scheduled_time: {scheduled_time}')
+                scheduled_time_display = await utc_to_current(scheduled_time, user["timezone"])
+                scheduled_time_display = scheduled_time_display.strftime("%a, %b %d, %Y, %I:%M %p")
+                #Convert from utc to current***************************************
+
                 reminder_time = datetime.timedelta(minutes=session["reminder_ahead_mins"])
-                #print(f'reminder_time: {reminder_time}')
                 duration_time = datetime.timedelta(minutes=session["duration_mins"])
-                #print(f'duration_time: {duration_time}')
                 if scheduled_time + duration_time < now:
                     #print(f'Deleting session and adding numbers to their profile.')
                     points = global_info["points_per_min"] * session["attended_mins"]
@@ -57,14 +59,15 @@ async def sendReminder():
 
                     await save_userinfo(user_id, user)
 
-                    await dm(client, user_id, f'Your study session at {session["datetime"]} which was scheduled for {session["duration_mins"]} in server {session["server_id"]} has ended. You studied for {session["attended_mins"]} mins and gained {points} points.')
-                elif scheduled_time + reminder_time <= now and bool(session["reminder"]):
+                    await dm(client, user_id, f'Your study session at {scheduled_time_display} which was scheduled for {session["duration_mins"]} mins in server {client.get_guild(int(session["server_id"])).name} ({session["server_id"]}) has ended. You studied for {session["attended_mins"]} mins and gained {points} points.')
+                elif scheduled_time - reminder_time <= now and bool(session["reminder"]):
                     #print(f'Reminder for {user_id}: {scheduled_time}')
-                    await send_message(client, session["server_id"], f'<@{user_id}> is starting a {session["duration_mins"]} min study session in {session["reminder_ahead_mins"]} mins (at {session["datetime"]}).')
+                    await send_message(client, session["server_id"], f'<@{user_id}> is starting a {session["duration_mins"]} min study session in {session["reminder_ahead_mins"]} mins (at {scheduled_time_display}).')
                     session["reminder"] = False
                     await save_userinfo(user_id, user)
                     index += 1
                 elif scheduled_time <= now:
+                    #print(f'Getting voicestate info')
                     server = client.get_guild(int(session["server_id"])) #Cannot get voicestate info using client.fetch_guild(id)
                     member = server.get_member(int(user_id)) #Cannot get voicestate info using server.fetch_member(id)
                     channel = member.voice.channel

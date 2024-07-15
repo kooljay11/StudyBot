@@ -2,7 +2,20 @@ import json
 from copy import deepcopy
 import os
 from datetime import datetime as dt
+from datetime import timedelta as td
+import dateparser
 
+async def current_to_utc(current: dt, user_tz: int):
+    delta = td(hours=user_tz)
+    utc = current - delta
+
+    return utc
+
+async def utc_to_current(utc: dt, user_tz: int):
+    delta = td(hours=user_tz)
+    current = utc + delta
+
+    return current
 
 async def get_default_session():
     with open("./default_data/session.json", "r") as file:
@@ -113,14 +126,49 @@ async def get_default_month():
     
     return month
 
+# async def send_message(client, server_id, message):
+#     try:
+#         #print(f'Sending message to {server_id}')
+#         server_info = await get_serverinfo()
+#         #print(f'int(server_info[server_id]["reminder_channel_id"]): {server_info[str(server_id)]["reminder_channel_id"]}')
+
+#         channel = await client.fetch_channel(int(server_info[str(server_id)]["reminder_channel_id"]))
+#         #print(f'channel.id: {channel.id}')
+
+#         if len(message) <= 2000:
+#             await channel.send(message)
+#         else:
+#             new_message = deepcopy(message)
+#             message_fragments = new_message.split("\n")
+#             message_to_send = ""
+#             for x in range(len(message_fragments)):
+#                 if len(message_to_send) + len(message_fragments[x-1]) < 2000:
+#                     message_to_send += "\n" + message_fragments[x-1]
+#                 else:
+#                     await channel.send(message_to_send)
+#                     message_to_send = message_fragments[x-1]
+            
+#             if len(message_to_send) > 0:
+#                 if len(message_to_send) < 2000:
+#                     await channel.send(message_to_send)
+#                 else:
+#                     await channel.send('Last message fragment too long to send. Ask developer to include more linebreaks in output.')
+#     except:
+#         print(f'Server {server_id} not found. Message: {message}')
+#         return
+
 async def send_message(client, server_id, message):
     try:
-        print(f'Sending message to {server_id}')
         server_info = await get_serverinfo()
-        print(f'int(server_info[server_id]["reminder_channel_id"]): {server_info[str(server_id)]["reminder_channel_id"]}')
+        await send_channel_message(client, int(server_info[str(server_id)]["reminder_channel_id"]), message)
+    except:
+        #print(f'Server {server_id} not found. Message: {message}')
+        await send_console_message(client, f'Server {server_id} not found. Message: {message}')
+        return
 
-        channel = await client.fetch_channel(int(server_info[str(server_id)]["reminder_channel_id"]))
-        print(f'channel.id: {channel.id}')
+async def send_channel_message(client, channel_id: int, message):
+    try:
+        channel = await client.fetch_channel(channel_id)
 
         if len(message) <= 2000:
             await channel.send(message)
@@ -141,8 +189,17 @@ async def send_message(client, server_id, message):
                 else:
                     await channel.send('Last message fragment too long to send. Ask developer to include more linebreaks in output.')
     except:
-        print(f'{server_id} not found. Message: {message}')
+        #print(f'Channel {channel_id} not found. Message: {message}')
+        await send_console_message(client, f'Channel {channel_id} not found. Message: {message}')
         return
+
+async def send_console_message(client, message):
+    try:
+        global_info = await get_globalinfo()
+    except:
+        print(f'Console channel not set in global_info.json')
+
+    await send_channel_message(client, global_info["console_channel_id"], message)
 
 async def dm(client, user_id, message):
     try:
