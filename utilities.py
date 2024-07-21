@@ -1,6 +1,5 @@
 import json
 from copy import deepcopy
-import os
 from datetime import datetime as dt
 from datetime import timedelta as td
 import dateparser
@@ -57,6 +56,12 @@ async def get_default_userinfo():
         user = json.load(file)
     
     return user
+
+async def get_config():
+    with open("config.json", "r") as file:
+        config = json.load(file)
+    
+    return config
 
 async def get_globalinfo():
     with open("./data/global_info.json", "r") as file:
@@ -125,37 +130,6 @@ async def get_default_month():
         month = json.load(file)
     
     return month
-
-# async def send_message(client, server_id, message):
-#     try:
-#         #print(f'Sending message to {server_id}')
-#         server_info = await get_serverinfo()
-#         #print(f'int(server_info[server_id]["reminder_channel_id"]): {server_info[str(server_id)]["reminder_channel_id"]}')
-
-#         channel = await client.fetch_channel(int(server_info[str(server_id)]["reminder_channel_id"]))
-#         #print(f'channel.id: {channel.id}')
-
-#         if len(message) <= 2000:
-#             await channel.send(message)
-#         else:
-#             new_message = deepcopy(message)
-#             message_fragments = new_message.split("\n")
-#             message_to_send = ""
-#             for x in range(len(message_fragments)):
-#                 if len(message_to_send) + len(message_fragments[x-1]) < 2000:
-#                     message_to_send += "\n" + message_fragments[x-1]
-#                 else:
-#                     await channel.send(message_to_send)
-#                     message_to_send = message_fragments[x-1]
-            
-#             if len(message_to_send) > 0:
-#                 if len(message_to_send) < 2000:
-#                     await channel.send(message_to_send)
-#                 else:
-#                     await channel.send('Last message fragment too long to send. Ask developer to include more linebreaks in output.')
-#     except:
-#         print(f'Server {server_id} not found. Message: {message}')
-#         return
 
 async def send_message(client, server_id, message):
     try:

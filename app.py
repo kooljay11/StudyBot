@@ -2,8 +2,6 @@
 import os
 import asyncio
 import datetime
-#from datetime import *
-import json
 import discord
 from discord.ext import commands, tasks
 from utilities import *
@@ -34,7 +32,6 @@ async def sendReminder():
                 scheduled_time = dateparser.parse(session["datetime"])
                 scheduled_time_display = await utc_to_current(scheduled_time, user["timezone"])
                 scheduled_time_display = scheduled_time_display.strftime("%a, %b %d, %Y, %I:%M %p")
-                #Convert from utc to current***************************************
 
                 reminder_time = datetime.timedelta(minutes=session["reminder_ahead_mins"])
                 duration_time = datetime.timedelta(minutes=session["duration_mins"])
@@ -70,10 +67,10 @@ async def sendReminder():
                     #print(f'Getting voicestate info')
                     server = client.get_guild(int(session["server_id"])) #Cannot get voicestate info using client.fetch_guild(id)
                     member = server.get_member(int(user_id)) #Cannot get voicestate info using server.fetch_member(id)
-                    channel = member.voice.channel
+                    voice_state = member.voice
                     
-                    if channel is not None:
-                        current_vc_id = channel.id
+                    if voice_state is not None:
+                        current_vc_id = voice_state.channel.id
                         if current_vc_id in servers[str(session["server_id"])]["study_vc_ids"]:
                             session["attended_mins"] += 1
                             await save_userinfo(user_id, user)
@@ -83,7 +80,7 @@ async def sendReminder():
                     break
 
 
-@tasks.loop(time=[datetime.time(hour=12, minute=0, tzinfo=datetime.timezone.utc)])
+@tasks.loop(time=[datetime.time(hour=1, minute=0, tzinfo=datetime.timezone.utc)])
 async def dailyReset():
     global_info = await get_globalinfo()
 
@@ -112,8 +109,7 @@ async def main():
     async with client:
         await load()
 
-        with open("config.json", "r") as file:
-            config = json.load(file)
+        config = await get_config()
 
         await client.start(config['token'])
 

@@ -48,7 +48,6 @@ class Sessions(commands.Cog):
             scheduled_datetime = dateparser.parse(session["datetime"])
             scheduled_datetime_display = await utc_to_current(scheduled_datetime, user["timezone"])
             formatted_scheduled_datetime = scheduled_datetime_display.strftime("%a, %b %d, %Y, %I:%M %p")
-            #Convert from utc to current***************************************
 
             duration_hours = int(session["duration_mins"]/60)
             duration_mins = session["duration_mins"]%60

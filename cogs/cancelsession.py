@@ -65,7 +65,6 @@ class CancelSession(commands.Cog):
         
         scheduled_datetime_display = await utc_to_current(dateparser.parse(cancelled_session["datetime"]), user["timezone"])
         session_date_formatted = scheduled_datetime_display.strftime("%a, %b %d, %Y, %I:%M %p")
-        #Convert from utc to current***************************************
         duration_hours = int(cancelled_session["duration_mins"]/60)
         duration_mins = cancelled_session["duration_mins"]%60
 

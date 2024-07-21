@@ -28,14 +28,12 @@ class AddSession(commands.Cog):
         try:
             session_date_display = dateparser.parse(date)
             session_date = await current_to_utc(session_date_display, user["timezone"])
-            #Convert from current to utc***************************************
         except:
             await reply(self.client, interaction, f'Couldn\'t parse that date, sorry. Please check the external module documentation for further information: https://github.com/scrapinghub/dateparser')
             return
         
         # Prevent the date being in the past
         now = datetime.now(UTC).replace(tzinfo=None)
-        #Get this time in utc***************************************
         if now >= session_date:
             await reply(self.client, interaction, f'You must schedule a session in the future.')
             return
