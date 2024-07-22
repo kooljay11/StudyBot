@@ -1,5 +1,6 @@
 {
     "console_channel_id": 1257026771895980210,
+    "last_active": "",
     "points_per_min": 1,
     "cancellation_penalty": [
         {
@@ -16,18 +17,32 @@
         }
     ],
     "monthly_rank": {
-        "1-White": 0,
-        "2-White-Yellow": 0.25,
-        "3-Yellow": 1,
-        "4-Orange": 3,
-        "5-Green": 6,
-        "6-Purple": 10,
-        "7-Blue": 20,
-        "8-Brown": 40,
-        "9-Red": 60,
-        "10-Red-Black": 80,
-        "11-Black-White": 140,
-        "12-Black": 200
+        "Level 1": 0,
+        "Level 2": 0.25,
+        "Level 3": 1,
+        "Level 4": 3,
+        "Level 5": 6,
+        "Level 6": 10,
+        "Level 7": 20,
+        "Level 8": 40,
+        "Level 9": 60,
+        "Level 10": 80,
+        "Level 11": 140,
+        "Level 12": 200
+    },
+    "monthly_emojis": {
+        "Level 1": "<:01White:1259196565789343796>",
+        "Level 2": "<:02WhiteYellow:1259196566888251493>",
+        "Level 3": "<:03Yellow:1259196568041685113>",
+        "Level 4": "<:04Orange:1259196569161564210>",
+        "Level 5": "<:05Green:1259196570377781269>",
+        "Level 6": "<:06Purple:1259196571678019594>",
+        "Level 7": "<:07Blue:1259196573846339666>",
+        "Level 8": "<:08Brown:1259196575725654126>",
+        "Level 9": "<:09Red:1259196576895860767>",
+        "Level 10": "<:10RedBlack:1259196629643296801>",
+        "Level 11": "<:11BlackWhite:1259196699893563473>",
+        "Level 12": "<:12Black:1259196701130883213>"
     },
     "all_time_rank": {
         "H": 0,

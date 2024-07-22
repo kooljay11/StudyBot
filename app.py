@@ -40,10 +40,10 @@ async def sendReminder():
                     points = global_info["points_per_min"] * session["attended_mins"]
                     user["points"] += points
                     month = await get_current_month(user)
-                    if month == "":
-                        month = await get_default_month()
-                        user["months"].append(month)
-                        month["date"] = now.strftime("%b %Y")
+                    # if month == "":
+                    #     month = await get_default_month()
+                    #     user["months"].append(month)
+                    #     month["date"] = now.strftime("%b %Y")
 
                     if session["attended_mins"] > 0:
                         month["completed_sessions"] += 1

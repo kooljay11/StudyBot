@@ -115,15 +115,70 @@ async def get_id_nickname(client, self_user, target: str):
     
     return {"id": target_id, "name": target_name}
 
+async def print_month(month):
+    global_info = await get_globalinfo()
+
+    if month["rank"] != "":
+        emoji = global_info["monthly_emojis"][month["rank"]]
+    else:
+        emoji = ""
+    
+    total_sessions = month["completed_sessions"]+month["failed_sessions"]
+
+    if total_sessions != 0:
+        percent_sessions = round(month["completed_sessions"]/total_sessions * 100)
+    else:
+        percent_sessions = 'NA'
+
+    if month["mins_scheduled"] != 0:
+        percent_hours = round(month["mins_studied"]/month["mins_scheduled"] * 100)
+    else:
+        percent_hours = 'NA'
+
+    message = f'**{month["date"]}** {emoji} '
+    #print(f'message post calc: {message}')
+    #message += f'\nRank: {current_month["rank"]}'
+    message += f'\nCompleted sessions: {month["completed_sessions"]} ({percent_sessions}%)'
+    message += f'\nFailed sessions: {month["failed_sessions"]}'
+
+    #message += f'\n% sessions completed: {percent_sessions}%'
+
+    message += f'\nTime studied: {int(month["mins_studied"]/60)} hrs {month["mins_studied"]%60} mins ({percent_hours}%)'
+    message += f'\nTime scheduled: {int(month["mins_scheduled"]/60)} hrs {month["mins_scheduled"]%60} mins'
+
+    #message += f'\n% hours studied: {percent_hours}%'
+
+    return message
+
 async def get_current_month(user):
     now = dt.now()
     date = now.strftime("%b %Y")
 
+    current_month = ""
+
     for month in user["months"]:
         if month["date"] == date:
-            return month
+            current_month = month
+            break
+        
+    if current_month == "":
+        current_month = await get_default_month()
+        user["months"].append(current_month)
+        current_month["date"] = date
     
-    return ""
+    return current_month
+
+async def get_current_year(user):
+    now = dt.now()
+    year = now.strftime("%Y")
+
+    current_year = []
+
+    for month in user["months"]:
+        if month["date"].find(year) > -1:
+            current_year.append(month)
+    
+    return current_year
 
 async def get_default_month():
     with open("./default_data/month.json", "r") as file:

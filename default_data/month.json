@@ -4,5 +4,6 @@
     "completed_sessions": 0,
     "failed_sessions": 0,
     "mins_studied": 0,
-    "mins_scheduled": 0
+    "mins_scheduled": 0,
+    "sessions": []
 }

@@ -13,10 +13,10 @@ async def reset(client):
             current_month = await get_current_month(user)
             now = dt.now()
 
-            if current_month == "":
-                current_month = await get_default_month()
-                user["months"].append(current_month)
-                current_month["date"] = now.strftime("%b %Y")
+            # if current_month == "":
+            #     current_month = await get_default_month()
+            #     user["months"].append(current_month)
+            #     current_month["date"] = now.strftime("%b %Y")
 
             # Give each user the monthly rank that corresponds to the amount of hours they studied this month
             for rank, hours in global_info["monthly_rank"].items():
