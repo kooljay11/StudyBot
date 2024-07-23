@@ -115,6 +115,84 @@ async def get_id_nickname(client, self_user, target: str):
     
     return {"id": target_id, "name": target_name}
 
+async def get_time_str(mins: int):
+    r_mins = mins%60
+    hrs = int(mins/60)
+
+    if hrs > 0 and r_mins > 0:
+        return f'{hrs} hrs {r_mins} mins'
+    elif hrs > 0:
+        return f'{hrs} hrs'
+    elif r_mins > 0:
+        return f'{r_mins} mins'
+
+async def get_top_5_ranks(ranks):
+    global_info = await get_globalinfo()
+    emoji_list = list(global_info["monthly_emojis"].values())
+    top_rank = emoji_list[len(global_info["monthly_rank"].keys())-1]
+    #print(f'top_rank: {top_rank}')
+
+    top_marks = True
+
+    # If any of the top 5 ranks gained are not from the top rank, then only the top 5 will be counted
+    for rank in ranks[:5]:
+        if rank != top_rank:
+            #print(f'ranks precull: {ranks}')
+            ranks = ranks[:5]
+            top_marks = False
+            #print(f'ranks postcull: {ranks}')
+            return ranks
+        
+
+    index = 0
+    # Otherwise keep entries of the top rank in the list only
+    if top_marks:
+        while index < len(ranks):
+            if ranks[index] != top_rank:
+                ranks.pop(index)
+            else:
+                index += 1
+
+        ranks = ranks[:index]
+
+        blackbelt1 = top_rank
+        blackbelt10 = emoji_list[len(global_info["monthly_rank"])]
+        blackbelt100 = emoji_list[len(global_info["monthly_rank"])+1]
+        base = 10
+
+        while True:
+            #print(f'ranks.count(blackbelt1): {ranks.count(blackbelt1)}')
+            if ranks.count(blackbelt1) >= base:
+                for a in range(base):
+                    ranks.remove(blackbelt1)
+                ranks.append(blackbelt10)
+            elif ranks.count(blackbelt10) >= base:
+                for a in range(base):
+                    ranks.remove(blackbelt10)
+                ranks.append(blackbelt100)
+            else:
+                ranks.sort(reverse=True)
+                return ranks
+
+#Takes a list of custom emojis for input
+async def get_rank_value(ranks):
+    global_info = await get_globalinfo()
+
+    value = 0
+    emojis_list = list(global_info["monthly_emojis"].values())
+    number_of_base_ranks = len(global_info["monthly_rank"].values())
+
+    #By default the lowest rank grants 0 score
+    for rank in ranks:
+        if rank in emojis_list[:number_of_base_ranks]:
+            value += emojis_list.index(rank)
+        elif rank == emojis_list[number_of_base_ranks]:
+            value += (number_of_base_ranks - 1) * 10
+        elif rank == emojis_list[number_of_base_ranks+1]:
+            value += (number_of_base_ranks - 1) * 100
+
+    return value
+
 async def print_month(month):
     global_info = await get_globalinfo()
 
