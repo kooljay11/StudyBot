@@ -98,19 +98,12 @@ class AddSession(commands.Cog):
         await save_userinfo(user_id, user)
         
         session_date_formatted = session_date_display.strftime("%a, %b %d, %Y, %I:%M %p")
-        duration_hours = int(session["duration_mins"]/60)
-        duration_mins = session["duration_mins"]%60
+        time_str = await get_time_str(session["duration_mins"])
 
-        message = f'New session added @ {session_date_formatted} for '
+        message = f'New session added @ {session_date_formatted} for {time_str} with a reminder {reminder_mins} mins beforehand. '
 
-        if duration_hours == 0:
-            message += f'{duration_mins} mins '
-        elif duration_mins == 0:
-            message += f'{duration_hours} hrs '
-        else:
-            message += f'{duration_hours} hrs and {duration_mins} mins '
-
-        message += f'with a reminder {reminder_mins} mins beforehand.'
+        if session["description"] != "":
+            message += f'Description: {session["description"]}'
 
         await reply(self.client, interaction, message)
 

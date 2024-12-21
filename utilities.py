@@ -264,6 +264,19 @@ async def get_default_month():
     
     return month
 
+async def user_is_studying(client, server_id: int, user_id: int):
+    servers = await get_serverinfo()
+    server = client.get_guild(server_id) #Cannot get voicestate info using client.fetch_guild(id)
+    member = server.get_member(user_id) #Cannot get voicestate info using server.fetch_member(id)
+    voice_state = member.voice
+    
+    if voice_state is not None:
+        current_vc_id = voice_state.channel.id
+        if current_vc_id in servers[str(server_id)]["study_vc_ids"]:
+            return True
+
+    return False
+
 async def send_message(client, server_id, message):
     try:
         server_info = await get_serverinfo()

@@ -65,19 +65,9 @@ class CancelSession(commands.Cog):
         
         scheduled_datetime_display = await utc_to_current(dateparser.parse(cancelled_session["datetime"]), user["timezone"])
         session_date_formatted = scheduled_datetime_display.strftime("%a, %b %d, %Y, %I:%M %p")
-        duration_hours = int(cancelled_session["duration_mins"]/60)
-        duration_mins = cancelled_session["duration_mins"]%60
+        time_str = await get_time_str(cancelled_session["duration_mins"])
 
-        message = f'Session cancelled @ {session_date_formatted} for '
-
-        if duration_hours == 0:
-            message += f'{duration_mins} mins '
-        elif duration_mins == 0:
-            message += f'{duration_hours} hrs '
-        else:
-            message += f'{duration_hours} hrs and {duration_mins} mins '
-
-        message += f'with a reminder {cancelled_session["reminder_ahead_mins"]} mins beforehand. '
+        message = f'Session cancelled @ {session_date_formatted} for {time_str} with a reminder {cancelled_session["reminder_ahead_mins"]} mins beforehand. '
 
         if penalty_cost > 0:
             message += f'Because of how close it was to the scheduled time, you paid a penalty cost of {penalty_cost} points to cancel it.'
