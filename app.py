@@ -45,29 +45,31 @@ async def sendReminder():
                 reminder_time = datetime.timedelta(minutes=session["reminder_ahead_mins"])
                 duration_time = datetime.timedelta(minutes=session["duration_mins"])
 
+                # 1) If the bot was last active before the scheduled time and the current time is before the scheduled time then skip
+                # 2) If the bot was last active before the scheduled time and the current time is before the scheduled endpoint then calculate time missed as current time - scheduled time
+                # 3) If the bot was last active before the scheduled time and the current time is after the scheduled endpoint then time missed = session duration
+                # 4) If the bot was last active after the scheduled time, but before the scheduled endpoint, and the current time is before the scheduled endpoint then calculate time missed as current time - time bot last active
+                # 5) If the bot was last active after the scheduled time, but before the scheduled endpoint, and the current time is after the scheduled endpoint then calculate time missed as scheduled endpoint - time bot last active
+                # 6) If the bot was last active after the scheduled endpoint (and the current time is after the scheduled endpoint) then skip
+
+                # If the current session has ended then check if there was any missed time and end the session if possible
                 if scheduled_time + duration_time < now:
                     if bot_was_down:
                         time_missed = datetime.timedelta(minutes=0)
-                        print(f'time_missed: {time_missed}')
-                        # If the bot was last active before the scheduled start time and the current time is beyond the scheduled endpoint
+
+                        # If the bot was last active before the scheduled start time and the session has ended (the current time is beyond the scheduled endpoint)
                         # Then set the time missed to the duration of the scheduled session
                         if last_bot_active <= scheduled_time:
                             time_missed = duration_time
-                            print(f'time_missed = duration_time: {time_missed}')
-                            print(f'time_missed = {duration_time}: {time_missed}')
-                        # Otherwise if the bot was last active after the scheduled start time
+                        # Otherwise if the bot was last active after the scheduled start time, but before the scheduled endpoint, and the session has ended (the current time is beyond the scheduled endpoint)
+                        # Then set the tiime missed to scheduled endpoint - time bot last active
                         elif last_bot_active < scheduled_time + duration_time:
                             time_missed = scheduled_time + duration_time - last_bot_active
-                            print(f'time_missed = scheduled_time + duration_time - last_bot_active: {time_missed}')
-                            print(f'time_missed = {scheduled_time} + {duration_time} - {last_bot_active}: {time_missed}')
 
-                        print(f'time_missed.min: {time_missed.min}')
-                        session["duration_mins"] -= time_missed.min
-                        print(f'session["duration_mins"]: {session["duration_mins"]}')
-                        scheduled_time -= time_missed
-                        print(f'scheduled_time: {scheduled_time}')
+                        # For any time missed due to the bot being down, reduce the scheduled duration and move up the start time to compensate, allowing for the end point of the session to remain the same
+                        session["duration_mins"] -= time_missed.total_seconds() // 60
+                        scheduled_time += time_missed
                         session["datetime"] = scheduled_time.strftime("%a, %b %d, %Y, %I:%M %p")
-                        print(f'session["datetime"]: {session["datetime"]}')
 
                     is_studying = await user_is_studying(client, session["server_id"], int(user_id))
 
@@ -90,8 +92,10 @@ async def sendReminder():
                     user["points"] += points
                     month = await get_current_month(user)
 
+                    # Session is considered completed if some minutes were completed in it
                     if session["attended_mins"] > 0:
                         month["completed_sessions"] += 1
+                    # Otherwise will be considered failed if no minutes were completed in it and the bot was NOT down
                     elif not bot_was_down:
                         month["failed_sessions"] += 1
 
@@ -109,22 +113,44 @@ async def sendReminder():
                     message += f'\nYou studied for {session["attended_mins"]} mins and gained {points} points.'
 
                     await dm(client, user_id, message)
+                # If the session is about to start then send a reminder to the user that its going to start
                 elif scheduled_time - reminder_time <= now and bool(session["reminder"]):
                     #print(f'Reminder for {user_id}: {scheduled_time}')
                     await send_message(client, session["server_id"], f'<@{user_id}> is starting a {session["duration_mins"]} min study session in {session["reminder_ahead_mins"]} mins (at {scheduled_time_display}).')
                     session["reminder"] = False
                     await save_userinfo(user_id, user)
-                    index += 1
-                elif scheduled_time <= now:
+
+                    # Copied from the "elif scheduled_time <= now:" section below
                     if bot_was_down:
                         time_missed = datetime.timedelta(minutes=0)
+                        # If the bot was last active before the scheduled time and the current time is before the scheduled endpoint then calculate time missed as current time - scheduled time
                         if last_bot_active <= scheduled_time:
                             time_missed = now - scheduled_time
+                        # If the bot was last active after the scheduled time, but before the scheduled endpoint, and the current time is before the scheduled endpoint then calculate time missed as current time - time bot last active
                         elif last_bot_active < scheduled_time + duration_time:
                             time_missed = now - last_bot_active
 
-                        session["duration_mins"] -= time_missed.min
-                        scheduled_time -= time_missed
+                        # For any time missed due to the bot being down, reduce the scheduled duration and move up the start time to compensate, allowing for the end point of the session to remain the same
+                        session["duration_mins"] -= time_missed.total_seconds() // 60
+                        scheduled_time += time_missed
+                        session["datetime"] = scheduled_time.strftime("%a, %b %d, %Y, %I:%M %p")
+                        await save_userinfo(user_id, user)
+
+                    index += 1
+                # If the session is in progress then keep track of how many minutes the user is in the study vc
+                elif scheduled_time <= now:
+                    if bot_was_down:
+                        time_missed = datetime.timedelta(minutes=0)
+                        # If the bot was last active before the scheduled time and the current time is before the scheduled endpoint then calculate time missed as current time - scheduled time
+                        if last_bot_active <= scheduled_time:
+                            time_missed = now - scheduled_time
+                        # If the bot was last active after the scheduled time, but before the scheduled endpoint, and the current time is before the scheduled endpoint then calculate time missed as current time - time bot last active
+                        elif last_bot_active < scheduled_time + duration_time:
+                            time_missed = now - last_bot_active
+
+                        # For any time missed due to the bot being down, reduce the scheduled duration and move up the start time to compensate, allowing for the end point of the session to remain the same
+                        session["duration_mins"] -= time_missed.total_seconds() // 60
+                        scheduled_time += time_missed
                         session["datetime"] = scheduled_time.strftime("%a, %b %d, %Y, %I:%M %p")
                         await save_userinfo(user_id, user)
 
