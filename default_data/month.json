@@ -5,5 +5,11 @@
     "failed_sessions": 0,
     "mins_studied": 0,
     "mins_scheduled": 0,
+    "points_earned_solo": 0,
+    "points_lost_solo": 0,
+    "points_earned_from_partner": 0,
+    "points_penalized_by_partner": 0,
+    "partner_id": 0,
+    "partner_name": "",
     "sessions": []
 }

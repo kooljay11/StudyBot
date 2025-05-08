@@ -20,11 +20,13 @@ async def reset(client):
 
             # Give each user the monthly rank that corresponds to the amount of hours they studied this month
             for rank, hours in global_info["monthly_rank"].items():
+                print(f"Checking to give {rank}")
                 # Dont check this rank if the user is of higher/equal rank AND it is not the first day of the month
-                if global_info["monthly_rank"].get(current_month["rank"], 0) >= hours and now.day != 1:
+                if global_info["monthly_rank"].get(current_month["rank"], -1) >= hours and now.day != 1:
                     continue
                 # If the user has more/equal hours required, give them the rank
                 elif current_month["mins_studied"] / 60 >= hours:
+                    print(f'Assigning {user_id} rank of {rank}')
                     #Assign new rank roles for each server
                     for server_id, server in servers.items():
 
@@ -59,6 +61,7 @@ async def reset(client):
 
                     #Remove current month's rank role
                     current_month["rank"] = rank
+                    print(f'current_month["rank"] = rank: {rank}')
                     #Give new rank role
                     await save_userinfo(user_id, user)
                     await dm(client, user_id, f'You were promoted to the rank of {rank} this month!')

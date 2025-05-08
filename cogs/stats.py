@@ -44,7 +44,7 @@ class Stats(commands.Cog):
         message += f'\nPoints: {target_info["points"]}'
 
         if target_info["partner_id"] != 0:
-            partner_id_nick = await get_id_nickname(self.client, user, target_info["partner_id"])
+            partner_id_nick = await get_id_nickname(self.client, user, str(target_info["partner_id"]))
             partner_name = partner_id_nick["name"]
             partner_id = f'({partner_id_nick["id"]})'
         else:
@@ -52,7 +52,7 @@ class Stats(commands.Cog):
             partner_id = ''
 
         if target_info["next_partner_id"] != 0:
-            next_partner_id_nick = await get_id_nickname(self.client, user, target_info["partner_id"])
+            next_partner_id_nick = await get_id_nickname(self.client, user, str(target_info["next_partner_id"]))
             next_partner_name = next_partner_id_nick["name"]
             next_partner_id = f'({next_partner_id_nick["id"]})'
         else:
@@ -174,7 +174,7 @@ class Stats(commands.Cog):
             target_data = await get_default_month()
             target = await get_userinfo(target_id)
             target_data["ranks"] = []
-            target_id_nick = await get_id_nickname(self.client, user, target_id)
+            target_id_nick = await get_id_nickname(self.client, user, str(target_id))
             #print(f'target_data["ranks"]: {target_data["ranks"]}')
             target_data["user_name"] = target_id_nick["name"]
             target_data["user_id"] = target_id

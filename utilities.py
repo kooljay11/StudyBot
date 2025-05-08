@@ -225,6 +225,20 @@ async def print_month(month):
     message += f'\nTime scheduled: {int(month["mins_scheduled"]/60)} hrs {month["mins_scheduled"]%60} mins'
 
     #message += f'\n% hours studied: {percent_hours}%'
+    message += f'\nPoints earned solo: {month["points_earned_solo"]}'
+    message += f'\nPoints lost solo: {month["points_lost_solo"]} (rate: {global_info["%_missed_penalty"]})'
+
+    # Get partner name
+    if month["partner_name"] != "":
+        partner_name = month["partner_name"]
+    else:
+        if month["partner_id"] != 0:
+            partner_name = f"partner (id: {month["partner_id"]})"
+        else:
+            partner_name = "partner"
+
+    message += f'\nPoints earned from {partner_name}: {month["points_earned_from_partner"]} (rate: {global_info["%_partner_earnings"]})'
+    message += f'\nPoints lost because of {partner_name}: {month["points_penalized_by_partner"]} (rate: {global_info["%_partner_penalty"]})'
 
     return message
 
