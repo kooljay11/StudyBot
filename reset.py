@@ -5,18 +5,92 @@ import discord
 async def reset(client):
     global_info = await get_globalinfo()
     servers = await get_serverinfo()
+    now = dt.now()
+
+    # If it is the start of a new month, remove all current partners and try to give everyone their preferred partners
+    if now.day == 1:
+        await remove_all_partners()
+        await give_preferred_partners()
+
+    # Assemble a list of all the user files as a list of all user ids
+    user_id_list = []
+    
+    for filename in os.listdir("./data/user_data"):
+        if filename.endswith(".json"):
+            user_id = os.path.splitext(filename)[0]
+            user = await get_userinfo(user_id)
+
+            # Skip users who already have a partner or who have opted out of the auto partnership
+            if user["partner_id"] != 0 or not user["auto_partner"]:
+                continue
+
+            #print(f'Assembling {user_id}')
+            prev_month = await get_prev_month(user)
+            #print(f'(os.path.splitext(filename)[0], prev_month["mins_studied"]): {(os.path.splitext(filename)[0], prev_month["mins_studied"])}')
+            user_id_list.append((os.path.splitext(filename)[0], prev_month["mins_studied"]))
+    #print(f'user_id_list (assembled): {user_id_list}')
+
+    # Order the list (descending) according to the mins studied last month
+    user_id_list.sort(key=lambda x: x[1], reverse=True)
+    #print(f'user_id_list (sorted): {user_id_list}')
+
+    for user_id, score in user_id_list:
+        # Make this user partners with whoever is next in the leaderboard that still needs a partner and wasn't able to have their preferred partner
+        #print(f'Searching for the best partner')
+
+        user = await get_userinfo(user_id)
+
+        if user["partner_id"] == 0:
+            index = [y[0] for y in user_id_list].index(user_id)
+
+            try:
+                partner_id = user_id_list[index + 1][0]
+            except IndexError:
+                continue
+
+            partner = await get_userinfo(partner_id)
+
+            user["partner_id"] = int(partner_id)
+            partner["partner_id"] = int(user_id)
+
+            #print(f'{user_id} and {partner_id} are now partners')
+
+            await save_userinfo(user_id, user)
+            await save_userinfo(partner_id, partner)
+
+            # DM both users
+            partner_id_nick = await get_id_nickname(client, user, partner_id)
+            user_id_nick = await get_id_nickname(client, partner, user_id)
+            await dm(client, user_id, f'You are now partners with {partner_id_nick["name"]} (id: {partner_id})')
+            await dm(client, partner_id, f'You are now partners with {user_id_nick["name"]} (id: {user_id})')
 
     for filename in os.listdir("./data/user_data"):
         if filename.endswith(".json"):
             user_id = os.path.splitext(filename)[0]
             user = await get_userinfo(user_id)
             current_month = await get_current_month(user)
-            now = dt.now()
+            
 
             # if current_month == "":
             #     current_month = await get_default_month()
             #     user["months"].append(current_month)
             #     current_month["date"] = now.strftime("%b %Y")
+
+            # OLD: Assign new partners if it is the start of a new month and they don't already have a partner
+            #if now.day == 1 and user["partner_id"] != 0:
+            # Assign new partners if they don't already have a partner
+            # If this user and their preferred partner both want to be a partners then make them partners
+            if user["partner_id"] != 0 and user["next_partner_id"] != 0:
+                potential_partner = await get_userinfo(user["next_partner_id"])
+
+                if potential_partner["partner_id"] == 0 and potential_partner["next_partner_id"] == user_id:
+                    user["partner_id"] = user["next_partner_id"]
+                    user["next_partner_id"] = 0
+                    potential_partner["partner_id"] = potential_partner["next_partner_id"]
+                    potential_partner["next_partner_id"] = 0
+
+                    await save_userinfo(user_id, user)
+                    await save_userinfo(user["partner_id"], potential_partner)
 
             # Give each user the monthly rank that corresponds to the amount of hours they studied this month
             for rank, hours in global_info["monthly_rank"].items():
@@ -67,3 +141,34 @@ async def reset(client):
                     await dm(client, user_id, f'You were promoted to the rank of {rank} this month!')
                 else:
                     break
+
+
+async def remove_all_partners():
+    for filename in os.listdir("./data/user_data"):
+        if filename.endswith(".json"):
+            user_id = os.path.splitext(filename)[0]
+            user = await get_userinfo(user_id)
+
+            user["partner_id"] = 0
+            await save_userinfo(user_id, user)
+    return
+
+async def give_preferred_partners():
+    for filename in os.listdir("./data/user_data"):
+        if filename.endswith(".json"):
+            user_id = os.path.splitext(filename)[0]
+            user = await get_userinfo(user_id)
+
+            # If this user and their preferred partner both want to be a partners then make them partners
+            if user["partner_id"] != 0 and user["next_partner_id"] != 0:
+                potential_partner = await get_userinfo(user["next_partner_id"])
+
+                if potential_partner["partner_id"] == 0 and potential_partner["next_partner_id"] == user_id:
+                    user["partner_id"] = user["next_partner_id"]
+                    user["next_partner_id"] = 0
+                    potential_partner["partner_id"] = potential_partner["next_partner_id"]
+                    potential_partner["next_partner_id"] = 0
+
+                    await save_userinfo(user_id, user)
+                    await save_userinfo(user["partner_id"], potential_partner)
+    return

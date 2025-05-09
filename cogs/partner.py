@@ -13,12 +13,13 @@ class Partner(commands.Cog):
         await self.client.tree.sync()
         print(f'{__name__} loaded successfully!')
     
-    @app_commands.command(name="partner", description="Show your partnership stats or set/remove your preferred partner for next month.")
+    @app_commands.command(name="partner", description="Show your partnership stats or set/remove your preferred partner for next month. Or toggle auto partnership on/off.")
     @app_commands.describe(mode="Mode")
     @app_commands.choices(mode=[
         app_commands.Choice(name="Show partnership", value="show"),
         app_commands.Choice(name="Set", value="set"),
-        app_commands.Choice(name="Remove", value="remove")
+        app_commands.Choice(name="Remove", value="remove"),
+        app_commands.Choice(name="Toggle auto partnership", value="autopartner")
     ])
     async def partner(self, interaction: discord.Interaction, mode: str = "show", partner: str = ""):
         user_id = interaction.user.id
@@ -109,6 +110,10 @@ class Partner(commands.Cog):
                 message = f'You\'ve removed your preferred partner for next month.'
             
             user["next_partner_id"] = 0
+            await save_userinfo(user_id, user)
+        elif mode == "autopartner":
+            user["auto_partner"] = not user["auto_partner"]
+            message = f'Auto partnership is now: {user["auto_partner"]}.'
             await save_userinfo(user_id, user)
             
         await reply(self.client, interaction, message)

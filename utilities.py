@@ -260,6 +260,30 @@ async def get_current_month(user):
     
     return current_month
 
+async def get_prev_month(user):
+    now = dt.now()
+    # Change it to the first of the month
+    target = now.replace(day=1)
+
+    # Roll back 2 days
+    target -= td(days=1)
+
+    date = target.strftime("%b %Y")
+
+    prev_month = ""
+
+    for month in user["months"]:
+        if month["date"] == date:
+            prev_month = month
+            break
+        
+    if prev_month == "":
+        prev_month = await get_default_month()
+        user["months"].append(prev_month)
+        prev_month["date"] = date
+    
+    return prev_month
+
 async def get_current_year(user):
     now = dt.now()
     year = now.strftime("%Y")
