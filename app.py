@@ -88,9 +88,25 @@ async def sendReminder():
                         continue
 
                     #print(f'Deleting session and adding numbers to their profile.')
-                    points = global_info["points_per_min"] * session["attended_mins"]
+                    # Give the user and their partner some points
+                    points = int(global_info["points_per_min"] * session["attended_mins"])
                     user["points"] += points
                     month = await get_current_month(user)
+                    month["points_earned_solo"] += points
+
+                    if user["partner_id"] != 0:
+                        try:
+                            partner = await get_userinfo(user["partner_id"])
+                            partner_month = await get_current_month(partner)
+                            partner_points = int(points * global_info["%_partner_earnings"])
+                            if partner_points > 0:
+                                partner["points"] += partner_points
+                                partner_month["points_earned_from_partner"] += partner_points
+                                await save_userinfo(user["partner_id"], partner)
+                                await dm(client, user["partner_id"], f'Your partner\'s study session at {scheduled_time_display} which was scheduled for {session["duration_mins"]} mins in server {client.get_guild(int(session["server_id"])).name} ({session["server_id"]}) has ended. They studied for {session["attended_mins"]} mins and you earned {partner_points} points as a result of their efforts.')
+                        except:
+                            await send_console_message(client, f'Couldn\'t find user {user_id}\'s partner {user["partner_id"]}')
+
 
                     # Session is considered completed if some minutes were completed in it
                     if session["attended_mins"] > 0:
@@ -98,9 +114,25 @@ async def sendReminder():
                     # Otherwise will be considered failed if no minutes were completed in it and the bot was NOT down
                     elif not bot_was_down:
                         month["failed_sessions"] += 1
+                        penalized_points = int(global_info["points_per_min"] * session["duration_mins"] * global_info["%_missed_penalty"])
+                        user["points"] -= penalized_points
+                        month["points_lost_solo"] += penalized_points
+                        points = 0 - penalized_points
 
-                    month["mins_studied"] += session["attended_mins"]
-                    month["mins_scheduled"] += session["duration_mins"]
+                        # Penalize the user and their study partner for failing the session
+                        if user["partner_id"] != 0:
+                            try:
+                                partner_penalized_points = int(penalized_points * global_info["%_partner_penalty"])
+                                if partner_penalized_points > 0:
+                                    partner["points"] -= partner_penalized_points
+                                    partner_month["points_penalized_by_partner"] += partner_penalized_points
+                                    await save_userinfo(user["partner_id"], partner)
+                                    await dm(client, user["partner_id"], f'Your partner\'s study session at {scheduled_time_display} which was scheduled for {session["duration_mins"]} mins in server {client.get_guild(int(session["server_id"])).name} ({session["server_id"]}) has ended. They studied for {session["attended_mins"]} mins and you lost {partner_penalized_points} points as a result of their efforts.')
+                            except:
+                                await send_console_message(client, f'Couldn\'t find user {user_id}\'s partner {user["partner_id"]}')
+
+                    month["mins_studied"] += int(session["attended_mins"])
+                    month["mins_scheduled"] += int(session["duration_mins"])
                     month["sessions"].append(session)
                     user["sessions"].remove(session)
 
