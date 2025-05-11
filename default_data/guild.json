@@ -1,0 +1,26 @@
+{
+    "name": "",
+    "abbreviation": "",
+    "perms": {
+        "owner": ["rename", "del", "unban"],
+        "admin": ["ban", "toggle_applicants", "toggle_new_members"],
+        "mod": ["promote", "demote", "kick"],
+        "helper": ["accept", "deny"],
+        "member": ["lb", "donate", "leave", "election", "recall", "vote"],
+        "everyone": ["info", "join", "create", "list"]
+    },
+    "new_applicants": true,
+    "new_members": true,
+    "recall_voters": [],
+    "election": {},
+    "election_days_left": 0,
+    "owner_id": 0,
+    "admin_ids": [],
+    "mod_ids": [],
+    "helper_ids": [],
+    "member_ids": [],
+    "points_total": 0,
+    "points_tracker": {},
+    "banned_ids": [],
+    "applicant_ids": []
+}
