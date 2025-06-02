@@ -6,7 +6,10 @@ import discord
 from discord.ext import commands, tasks
 from utilities import *
 import dateparser
+import warnings
 from reset import reset
+#pip install discord.py
+#pip install dateparser
 #https://discordpy.readthedocs.io/en/stable/intro.html
 
 client = commands.Bot(command_prefix="/", intents=discord.Intents.all())
@@ -17,7 +20,10 @@ async def sendReminder():
     now = datetime.datetime.now(datetime.UTC).replace(tzinfo=None)
     #servers = await get_serverinfo()
     global_info = await get_globalinfo()
-    last_bot_active = dateparser.parse(global_info["last_active"])
+    # Ignore the faulty deprecation warning that dateparser tries to show about not having a year in the parse(), despite actually having it in there
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=DeprecationWarning)
+        last_bot_active = dateparser.parse(global_info["last_active"])
     time_lost = now - last_bot_active
     if time_lost >= datetime.timedelta(minutes=2):
         bot_was_down = True
@@ -212,6 +218,11 @@ async def dailyReset():
 
 @client.event
 async def on_ready():
+    #print("Trying to connect to discord")
+    # try:
+    #     await client.tree.sync()
+    # except Exception as err:
+    #     print(f'Error: {err}')
     await client.tree.sync()
     print("Bot is connected to Discord")
     dailyReset.start()
@@ -231,7 +242,15 @@ async def main():
 
         config = await get_config()
 
+        # print("Bot is trying to start")
+        # try:
+        #     await client.start(config['token'])
+        # except discord.LoginFailure as e:
+        #     print(f'Login failure: {e}')
+        # except Exception as err:
+        #     print(f'Error: {err}')
         await client.start(config['token'])
+        print("Bot has started!")
 
 asyncio.run(main())
 

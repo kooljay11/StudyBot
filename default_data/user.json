@@ -4,6 +4,8 @@
     "partner_id": 0,
     "next_partner_id": 0,
     "auto_partner": true,
+    "guild_name": "",
+    "guild_points_donated": 0,
     "guild_id": -1,
     "default_guild_id": -1,
     "default_reminder_ahead": 1,

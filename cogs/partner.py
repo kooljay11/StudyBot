@@ -12,8 +12,9 @@ class Partner(commands.Cog):
     async def on_ready(self):
         await self.client.tree.sync()
         print(f'{__name__} loaded successfully!')
-    
-    @app_commands.command(name="partner", description="Show your partnership stats or set/remove your preferred partner for next month. Or toggle auto partnership on/off.")
+
+    #Description: Show your partnership stats or set/remove your preferred partner for next month. Or toggle auto partnership on/off.
+    @app_commands.command(name="partner", description="Show partnership stats, set/remove preferred partner for next month, or toggle auto partnership.")
     @app_commands.describe(mode="Mode")
     @app_commands.choices(mode=[
         app_commands.Choice(name="Show partnership", value="show"),

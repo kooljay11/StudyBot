@@ -1,6 +1,8 @@
 {
     "console_channel_id": 1257026771895980210,
     "last_active": "",
+    "election_days_length": 7,
+    "recall_threshold": 0.5,
     "points_per_min": 1,
     "%_partner_earnings": 0.25,
     "%_partner_penalty": 0.5,
