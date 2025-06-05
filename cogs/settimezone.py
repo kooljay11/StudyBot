@@ -83,6 +83,25 @@ class SetTimeZone(commands.Cog):
         message = f'UTC time: {utc_string}\nYour time: {tz_string}'
         await reply(self.client, interaction, message)
 
+    @app_commands.command(name="checktimezone", description="Check if your time zone is correct.")
+    async def check_timezone(self, interaction: discord.Interaction):
+        # Add a new user profile if necessary
+        user_id = interaction.user.id
+        try:
+            user = await get_userinfo(user_id)
+        except:
+            await create_user_profile(user_id)
+            user = await get_userinfo(user_id)
+
+        utc_now = datetime.now(timezone.utc)
+        utc_string = utc_now.strftime("%a, %b %d, %Y, %I:%M %p")
+
+        tz_now = await utc_to_current(utc_now, user["timezone"])
+        tz_string = tz_now.strftime("%a, %b %d, %Y, %I:%M %p")
+        
+        message = f'UTC time: {utc_string}\nYour time (UTC {user["timezone"]}): {tz_string}'
+        await reply(self.client, interaction, message)
+
 
 async def setup(client):
     await client.add_cog(SetTimeZone(client))
