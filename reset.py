@@ -142,6 +142,66 @@ async def reset(client):
                 else:
                     break
 
+    # Check through all the guilds in the list for election stuff
+    for filename in os.listdir("./data/guild_data"):
+        if filename.endswith(".json"):
+            guild_name = os.path.splitext(filename)[0]
+            guild = await get_guildinfo(guild_name)
+
+            # If there is an ongoing election
+            if guild["election_days_left"] > 0:
+                guild["election_days_left"] -= 1
+
+                non_voters = deepcopy(guild["all_member_ids"])
+
+                for candidate_id, voter_ids in guild["election"].items():
+                    for voter_id in voter_ids:
+                        if voter_id in non_voters:
+                            non_voters.remove(voter_id)
+
+                # If the guild election has come to the end or all members have cast a vote, then set the new owner, set election days to 0, and set election to {} 
+                if guild["election_days_left"] == 0 or len(non_voters) <= 0:
+                    # Convert the guild["election"] from a candidate list with lists of voters TO a candidate list with numbers of voters
+                    election = {k:len(v) for k, v in guild["election"].items()}
+                    # Get the key(s) for the leading candidate(s)
+                    lead_candidate_ids = [kv[0] for kv in election.items() if kv[1] == max(election.values())]
+
+                    # If there is a tie, then start a runoff election, removing all the candidates who didnt have the max
+                    if len(lead_candidate_ids) > 1:
+                        guild["election_days_left"] = global_info["runoff_election_days_length"]
+                        new_election = {}
+
+                        for candidate_id in lead_candidate_ids:
+                            new_election[candidate_id] = guild["election"][candidate_id]
+
+                        guild["election"] = new_election
+                        
+                        for member_id in guild["all_member_ids"]:
+                            await dm(client, member_id, f'A runoff election was called since there was a tie between candidates. Votes for the lead candidates remain, {guild["election_days_left"]} days have been given for members to change their votes.')
+                    # Otherwise set the new owner, set the election days to 0, and clear the election
+                    else:
+                        winner_id = int(lead_candidate_ids[0])
+                        guild["role_user_ids"]["member"].append(guild["owner_id"])
+                        guild["role_user_ids"]["member"] = list(set(guild["role_user_ids"]["member"]))
+
+                        guild["owner_id"] = winner_id
+
+                        guild["election_days_left"] = 0
+                        guild["election"] = {}
+
+                await save_guildinfo(guild_name, guild)
+                
+            # If the guild has enough recall voters then start an election
+            elif len(guild["recall_voters"]) >= global_info["recall_threshold"] * len(guild["all_member_ids"]):
+                guild["recall_voters"] = []
+                guild["election_days_left"] = global_info["election_days_length"]
+                guild["election"] = {}
+
+                await save_guildinfo(guild_name, guild)
+
+                for member_id in guild["all_member_ids"]:
+                    await dm(client, member_id, f'An election has been called. Voting will continue for {guild["election_days_left"]} days.')
+
 
 async def remove_all_partners():
     for filename in os.listdir("./data/user_data"):
