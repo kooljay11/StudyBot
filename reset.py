@@ -92,55 +92,7 @@ async def reset(client):
                     await save_userinfo(user_id, user)
                     await save_userinfo(user["partner_id"], potential_partner)
 
-            # Give each user the monthly rank that corresponds to the amount of hours they studied this month
-            for rank, hours in global_info["monthly_rank"].items():
-                print(f"Checking to give {rank}")
-                # Dont check this rank if the user is of higher/equal rank AND it is not the first day of the month
-                if global_info["monthly_rank"].get(current_month["rank"], -1) >= hours and now.day != 1:
-                    continue
-                # If the user has more/equal hours required, give them the rank
-                elif current_month["mins_studied"] / 60 >= hours:
-                    print(f'Assigning {user_id} rank of {rank}')
-                    #Assign new rank roles for each server
-                    for server_id, server in servers.items():
-
-                        server = client.get_guild(int(server_id)) #Cannot get voicestate info using client.fetch_guild(id)
-                        member = server.get_member(int(user_id)) #Cannot get voicestate info using server.fetch_member(id)
-                        # print(f'member.roles: {member.roles}')
-
-                        #Remove old role if not the first of the month
-                        if now.day != 1:
-                            old_role = discord.utils.get(server.roles, name=current_month["rank"])
-                            # print(f'old_role: {old_role}')
-                            try:
-                                await member.remove_roles(old_role)
-                            except:
-                                print(f'')
-                        #Otherwise remove all old rank roles
-                        else:
-                            for rank_name, value in global_info["monthly_rank"].items():
-                                old_role = discord.utils.get(server.roles, name=rank_name)
-                                try:
-                                    # print(f'Attempting to remove {rank_name}')
-                                    if old_role in member.roles:
-                                        await member.remove_roles(old_role)
-                                    # else:
-                                    #     print(f'Did\'t remove {rank_name}')
-                                except:
-                                    print(f'Couldn\'t remove {rank_name} from user {user_id}')
-
-                        new_role = discord.utils.get(server.roles, name=rank)
-                        # print(f'new_role: {new_role}')
-                        await member.add_roles(new_role)
-
-                    #Remove current month's rank role
-                    current_month["rank"] = rank
-                    print(f'current_month["rank"] = rank: {rank}')
-                    #Give new rank role
-                    await save_userinfo(user_id, user)
-                    await dm(client, user_id, f'You were promoted to the rank of {rank} this month!')
-                else:
-                    break
+            await give_monthly_rank(client, global_info, now, current_month, user_id, user, servers)
 
     # Check through all the guilds in the list for election stuff
     for filename in os.listdir("./data/guild_data"):
@@ -202,6 +154,61 @@ async def reset(client):
                 for member_id in guild["all_member_ids"]:
                     await dm(client, member_id, f'An election has been called. Voting will continue for {guild["election_days_left"]} days.')
 
+
+async def give_monthly_rank(client, global_info, now, current_month, user_id, user, servers):
+    message = f'Your rank is unchanged.'
+    # Give each user the monthly rank that corresponds to the amount of hours they studied this month
+    for rank, hours in global_info["monthly_rank"].items():
+        print(f"Checking to give {rank}")
+        # Dont check this rank if the user is of higher/equal rank AND it is not the first day of the month
+        if global_info["monthly_rank"].get(current_month["rank"], -1) >= hours and now.day != 1:
+            continue
+        # If the user has more/equal hours required, give them the rank
+        elif current_month["mins_studied"] / 60 >= hours:
+            print(f'Assigning {user_id} rank of {rank}')
+            #Assign new rank roles for each server
+            for server_id, server in servers.items():
+
+                server = client.get_guild(int(server_id)) #Cannot get voicestate info using client.fetch_guild(id)
+                member = server.get_member(int(user_id)) #Cannot get voicestate info using server.fetch_member(id)
+                # print(f'member.roles: {member.roles}')
+
+                #Remove old role if not the first of the month
+                if now.day != 1:
+                    old_role = discord.utils.get(server.roles, name=current_month["rank"])
+                    # print(f'old_role: {old_role}')
+                    try:
+                        await member.remove_roles(old_role)
+                    except:
+                        print(f'')
+                #Otherwise remove all old rank roles
+                else:
+                    for rank_name, value in global_info["monthly_rank"].items():
+                        old_role = discord.utils.get(server.roles, name=rank_name)
+                        try:
+                            # print(f'Attempting to remove {rank_name}')
+                            if old_role in member.roles:
+                                await member.remove_roles(old_role)
+                            # else:
+                            #     print(f'Did\'t remove {rank_name}')
+                        except:
+                            print(f'Couldn\'t remove {rank_name} from user {user_id}')
+
+                new_role = discord.utils.get(server.roles, name=rank)
+                # print(f'new_role: {new_role}')
+                await member.add_roles(new_role)
+
+            #Remove current month's rank role
+            current_month["rank"] = rank
+            print(f'current_month["rank"] = rank: {rank}')
+            #Give new rank role
+            message = f'You were promoted to the rank of {rank} this month!'
+            await save_userinfo(user_id, user)
+            await dm(client, user_id, message)
+        else:
+            break
+    
+    return message
 
 async def remove_all_partners():
     for filename in os.listdir("./data/user_data"):
