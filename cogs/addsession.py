@@ -108,8 +108,8 @@ class AddSession(commands.Cog):
 
             await reply(self.client, interaction, message)
         except Exception as err:
-            await send_console_message(self.client, err)
             print(f'Error: {err}')
+            await send_console_message(self.client, err)
 
 
 async def setup(client):
