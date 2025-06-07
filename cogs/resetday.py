@@ -17,11 +17,11 @@ class ResetDay(commands.Cog):
     @app_commands.command(name="resetday", description="Dev: Reset the day.")
     #@app_commands.default_permissions(administrator=True)
     async def resetday(self, interaction: discord.Interaction):
-        config = await get_config()
+        global_info = await get_globalinfo()
 
         user_id = interaction.user.id
 
-        if user_id not in config["dev_list"]:
+        if user_id not in global_info["dev_list"]:
             await reply(self.client, interaction, f'Only developers can use this command.')
             return
         await reset(self.client)
