@@ -320,7 +320,7 @@ async def save_serverinfo(server_info):
 
 async def create_user_profile(client, user_id):
     default_user = await get_default_userinfo()
-    default_user["nicknames"].append(str(await client.fetch_user(user_id)))
+    default_user["nicknames"][str(await client.fetch_user(user_id))] = user_id
 
     await save_userinfo(user_id, default_user)
 
