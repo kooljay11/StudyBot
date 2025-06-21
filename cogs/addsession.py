@@ -27,12 +27,16 @@ class AddSession(commands.Cog):
                 user = await get_userinfo(user_id)
 
             try:
+                user_tz = deepcopy(user["timezone"])
                 user_timezone_for_parser = ''
-                if user["timezone"] > 0:
+                if user_tz > 0:
                     user_timezone_for_parser += f'+'
-                if user["timezone"] > 10 or user["timezone"] < 10:
+                else:
+                    user_timezone_for_parser += f'-'
+                    user_tz *= -1
+                if user_tz < 10 and user_tz > -10:
                     user_timezone_for_parser += f'0'
-                user_timezone_for_parser += f'{int(user["timezone"]) * 100 + int(user["timezone"] % 1 * 60)}'
+                user_timezone_for_parser += f'{int(user_tz) * 100 + int(user_tz % 1 * 60)}'
                 print(f'user_timezone_for_parser: {user_timezone_for_parser}')
 
                 #session_date_display = dateparser.parse(f'{date} {user_timezone_for_parser}')
