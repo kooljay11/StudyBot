@@ -35,11 +35,11 @@ class AddSession(commands.Cog):
 
                 #session_date_display = dateparser.parse(f'{date} {user_timezone_for_parser}')
                 # Comes out as UTC
-                session_date_display = dateparser.parse(f'{date}')
+                session_date_display = dateparser.parse(f'{date}', settings={'TIMEZONE': f'{user_timezone_for_parser}'})
 
                 print(f'session_date_display: {session_date_display}')
-                #session_date = await current_to_utc(session_date_display, user["timezone"])
-                session_date = session_date_display
+                session_date = await current_to_utc(session_date_display, user["timezone"])
+                #session_date = session_date_display
                 print(f'session_date: {session_date}')
             except:
                 await reply(self.client, interaction, f'Couldn\'t parse that date, sorry. Please check the external module documentation for further information: https://github.com/scrapinghub/dateparser')
