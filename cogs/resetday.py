@@ -15,7 +15,7 @@ class ResetDay(commands.Cog):
         print(f'{__name__} loaded successfully!')
     
     @app_commands.command(name="resetday", description="Dev: Reset the day.")
-    #@app_commands.default_permissions(administrator=True)
+    @app_commands.default_permissions(administrator=True)
     async def resetday(self, interaction: discord.Interaction):
         global_info = await get_globalinfo()
 
