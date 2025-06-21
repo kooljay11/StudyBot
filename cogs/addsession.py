@@ -30,6 +30,8 @@ class AddSession(commands.Cog):
                 user_timezone_for_parser = ''
                 if user["timezone"] > 0:
                     user_timezone_for_parser += f'+'
+                if user["timezone"] > 10 or user["timezone"] < 10:
+                    user_timezone_for_parser += f'0'
                 user_timezone_for_parser += f'{int(user["timezone"]) * 100 + int(user["timezone"] % 1 * 60)}'
                 print(f'user_timezone_for_parser: {user_timezone_for_parser}')
 
