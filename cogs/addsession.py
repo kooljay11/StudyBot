@@ -40,8 +40,7 @@ class AddSession(commands.Cog):
                 #print(f'user_timezone_for_parser: {user_timezone_for_parser}')
 
                 # THIS DOES NOT WORK ON THE UBUNTU SERVER: session_date_display = dateparser.parse(f'{date} {user_timezone_for_parser}')
-                #session_date_display = dateparser.parse(f'{date}', settings={'TIMEZONE': f'{user_timezone_for_parser}'})
-                session_date_display = dateparser.parse(f'{date} {user_timezone_for_parser}')
+                session_date_display = dateparser.parse(f'{date}', settings={'TIMEZONE': f'{user_timezone_for_parser}'})
 
                 #print(f'session_date_display: {session_date_display}')
                 session_date = await current_to_utc(session_date_display, user["timezone"])
