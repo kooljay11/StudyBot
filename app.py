@@ -23,7 +23,10 @@ async def sendReminder():
     # Ignore the faulty deprecation warning that dateparser tries to show about not having a year in the parse(), despite actually having it in there
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", category=DeprecationWarning)
-        last_bot_active = dateparser.parse(global_info["last_active"])
+        if global_info["last_active"] != "":
+            last_bot_active = dateparser.parse(global_info["last_active"])
+        else:
+            last_bot_active = now
     time_lost = now - last_bot_active
     if time_lost >= datetime.timedelta(minutes=2):
         bot_was_down = True
