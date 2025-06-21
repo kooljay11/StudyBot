@@ -5,13 +5,13 @@ from datetime import timedelta as td
 #import dateparser
 import os
 
-async def current_to_utc(current: dt, user_tz: int):
+async def current_to_utc(current: dt, user_tz: float):
     delta = td(hours=user_tz)
     utc = current - delta
 
     return utc
 
-async def utc_to_current(utc: dt, user_tz: int):
+async def utc_to_current(utc: dt, user_tz: float):
     delta = td(hours=user_tz)
     current = utc + delta
 
