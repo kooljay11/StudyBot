@@ -74,6 +74,8 @@ class SetTimeZone(commands.Cog):
         
         user["timezone"] = utc_offset
 
+        await save_userinfo(user_id, user)
+
         utc_now = datetime.now(timezone.utc)
         utc_string = utc_now.strftime("%a, %b %d, %Y, %I:%M %p")
 
