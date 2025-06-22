@@ -1,7 +1,7 @@
 {
     "console_channel_id": 1257026771895980210,
     "last_active": "",
-    "help_message": "**How to Get Started**\n1. Check what your local UTC offset is here: https://www.timeanddate.com/time/map/\n2. `/settimezone` - Set your time zone using your UTC offset\nMake sure it's correct using `/checktimezone`\n3. `/stats` - View your user stats\n4. `/addsession` - Schedule a study session\n5. Check the user-made help document for more info: https://docs.google.com/document/d/1mu6uXzcJKhikaaL6fO1lagZxLXKer6dis_abSdt-stQ/edit?usp=sharing",
+    "help_message": "**How to Get Started**\n1. Check what your local UTC offset is here: https://www.timeanddate.com/time/map/\n2. `/settimezone` - Set your time zone using your UTC offset\nMake sure it's correct using `/checktimezone`\n3. `/stats` - View your user stats\n4. `/addsession` - Schedule a study session\n5. Check the user-made help document for more info: https://docs.google.com/document/d/1mu6uXzcJKhikaaL6fO1lagZxLXKer6dis_abSdt-stQ/edit?usp=sharing\n\n**Managing Friends**\n1. `/getuserid` - Get a user's id\n2. `/nickname` - Set a nickname to that user's id. This allows you to use that nickname to refer to that user in other commands. This does not have to be the same as their server nickname. You can even name them bozo if you like.\n3. `/friend` - Add your friend using the new nickname you've given them. They must have interacted with the bot before otherwise the bot won't find them.",
     "election_days_length": 7,
     "runoff_election_days_length": 2,
     "recall_threshold": 0.5,
