@@ -68,13 +68,9 @@ class SetTimeZone(commands.Cog):
         user_id = interaction.user.id
         try:
             user = await get_userinfo(user_id)
-        except Exception as err:
-            print(f'err: {err}')
-            try:
-                await create_user_profile(user_id)
-                user = await get_userinfo(user_id)
-            except Exception as error:
-                print(f'error: {error}')
+        except:
+            await create_user_profile(self.client, user_id)
+            user = await get_userinfo(user_id)
         
         user["timezone"] = utc_offset
 
@@ -96,7 +92,7 @@ class SetTimeZone(commands.Cog):
         try:
             user = await get_userinfo(user_id)
         except:
-            await create_user_profile(user_id)
+            await create_user_profile(self.client, user_id)
             user = await get_userinfo(user_id)
 
         utc_now = datetime.now(timezone.utc)

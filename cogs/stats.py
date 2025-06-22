@@ -27,7 +27,7 @@ class Stats(commands.Cog):
         try:
             user = await get_userinfo(user_id)
         except:
-            await create_user_profile(user_id)
+            await create_user_profile(self.client, user_id)
             user = await get_userinfo(user_id)
 
         if target != user_id and target != "":
@@ -138,7 +138,7 @@ class Stats(commands.Cog):
         try:
             user = await get_userinfo(user_id)
         except:
-            await create_user_profile(user_id)
+            await create_user_profile(self.client, user_id)
             user = await get_userinfo(user_id)
 
         users = []
