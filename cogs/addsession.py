@@ -16,7 +16,7 @@ class AddSession(commands.Cog):
         print(f'{__name__} loaded successfully!')
     
     @app_commands.command(name="addsession", description="Schedules a new session.")
-    async def add_session(self, interaction: discord.Interaction, datetime: str, duration_hours: int = 0, duration_mins: int = 0, reminder_mins: int = -1, description: str = ""):        
+    async def add_session(self, interaction: discord.Interaction, date_time: str, duration_hours: int = 0, duration_mins: int = 0, reminder_mins: int = -1, description: str = ""):        
         try:
             # Add a new user profile if necessary
             user_id = interaction.user.id
@@ -39,8 +39,8 @@ class AddSession(commands.Cog):
                 user_timezone_for_parser += f'{int(user_tz) * 100 + int(user_tz % 1 * 60)}'
                 #print(f'user_timezone_for_parser: {user_timezone_for_parser}')
 
-                # THIS DOES NOT WORK ON THE UBUNTU SERVER: session_date_display = dateparser.parse(f'{datetime} {user_timezone_for_parser}')
-                session_date_display = dateparser.parse(f'{datetime}', settings={'TIMEZONE': f'{user_timezone_for_parser}'})
+                # THIS DOES NOT WORK ON THE UBUNTU SERVER: session_date_display = dateparser.parse(f'{date_time} {user_timezone_for_parser}')
+                session_date_display = dateparser.parse(f'{date_time}', settings={'TIMEZONE': f'{user_timezone_for_parser}'})
 
                 #print(f'session_date_display: {session_date_display}')
                 session_date = await current_to_utc(session_date_display, user["timezone"])
