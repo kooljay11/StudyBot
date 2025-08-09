@@ -46,25 +46,17 @@ class Stats(commands.Cog):
         message += f'\nTimezone UTC offset: {target_info["timezone"]}'
         message += f'\nPoints: {target_info["points"]}'
         
-        message += f'\n All Ranks: '
-        print(f'user_name: {user_name}')
+        message += f'\nAll Ranks: '
         ranks = dict(reversed(global_info["monthly_rank"].items()))
-        print(f'ranks: {ranks}')
         ranks.update(dict.fromkeys(ranks, 0))
-
-        # for rank, num in ranks.items():
-        #     num = 0
 
         for month in user["months"]:
             ranks[month["rank"]] += 1
         
-        print(f'ranks: {ranks}')
-
         for rank, num in ranks.items():
             if num > 0:
                 emoji = global_info["monthly_emojis"][rank]
                 message += f'{emoji} {num} '
-        print(f'ranks: {ranks}')
 
         if target_info["partner_id"] != 0:
             partner_id_nick = await get_id_nickname(self.client, user, str(target_info["partner_id"]))
