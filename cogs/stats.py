@@ -4,6 +4,7 @@ from discord.ext import commands, tasks
 from utilities import *
 from datetime import *
 import os
+from copy import deepcopy
 
 class Stats(commands.Cog):
     def __init__(self, client):
@@ -46,18 +47,23 @@ class Stats(commands.Cog):
         message += f'\nPoints: {target_info["points"]}'
         
         message += f'\n All Ranks: '
+        print(f'user_name: {user_name}')
         ranks = deepcopy(global_info["monthly_rank"]).__reversed__
+        print(f'ranks: {ranks}')
 
         for rank, num in ranks.items():
             num = 0
 
         for month in user["months"]:
             ranks[month["rank"]] += 1
+        
+        print(f'ranks: {ranks}')
 
         for rank, num in ranks.items():
             if num > 0:
                 emoji = global_info["monthly_emojis"][rank]
                 message += f'{emoji} {num} '
+        print(f'ranks: {ranks}')
 
         if target_info["partner_id"] != 0:
             partner_id_nick = await get_id_nickname(self.client, user, str(target_info["partner_id"]))
