@@ -14,6 +14,41 @@ class AddSession(commands.Cog):
     async def on_ready(self):
         await self.client.tree.sync()
         print(f'{__name__} loaded successfully!')
+
+        
+    @app_commands.command(name="testdatetime", description="Schedules a new session.")
+    @app_commands.default_permissions(administrator=True)
+    async def test_date_time(self, interaction: discord.Interaction, date_time: str, timezone: float = 99.0):        
+        # Add a new user profile if necessary
+        user_id = interaction.user.id
+        try:
+            user = await get_userinfo(user_id)
+        except:
+            await create_user_profile(self.client, user_id)
+            user = await get_userinfo(user_id)
+
+        if timezone >= 99:
+            user_tz = deepcopy(user["timezone"])
+        else:
+            user_tz = timezone
+
+        try:
+            now = datetime.now(UTC).replace(tzinfo=None)
+            local_now = await utc_to_current(now, user_tz)
+            session_date_display = dateparser.parse(f'{date_time}', settings={'RELATIVE_BASE': local_now})
+        except Exception as err:
+            print(f'Error: {err}')
+
+        session_date = await current_to_utc(session_date_display, user["timezone"])
+
+        session_date_formatted = session_date_display.strftime("%a, %b %d, %Y, %I:%M %p")
+        message = f'Input: {date_time}'
+        message += f'\nOutput (UTC): {session_date}'
+        message += f'\nOutput (formatted, local): {session_date_formatted}'
+
+        await reply(self.client, interaction, message)
+
+        return
     
     @app_commands.command(name="addsession", description="Schedules a new session.")
     async def add_session(self, interaction: discord.Interaction, date_time: str, duration_hours: int = 0, duration_mins: int = 0, reminder_mins: int = -1, description: str = ""):        
@@ -28,24 +63,11 @@ class AddSession(commands.Cog):
 
             try:
                 user_tz = deepcopy(user["timezone"])
-                user_timezone_for_parser = ''
-                if user_tz > 0:
-                    user_timezone_for_parser += f'+'
-                else:
-                    user_timezone_for_parser += f'-'
-                    user_tz *= -1
-                if user_tz < 10 and user_tz > -10:
-                    user_timezone_for_parser += f'0'
-                user_timezone_for_parser += f'{int(user_tz) * 100 + int(user_tz % 1 * 60)}'
-                #print(f'user_timezone_for_parser: {user_timezone_for_parser}')
-
-                # THIS DOES NOT WORK ON THE UBUNTU SERVER: session_date_display = dateparser.parse(f'{date_time} {user_timezone_for_parser}')
-                session_date_display = dateparser.parse(f'{date_time}', settings={'TIMEZONE': f'{user_timezone_for_parser}'})
-
-                #print(f'session_date_display: {session_date_display}')
+                now = datetime.now(UTC).replace(tzinfo=None)
+                local_now = await utc_to_current(now, user_tz)
+                session_date_display = dateparser.parse(f'{date_time}', settings={'RELATIVE_BASE': local_now})
+                
                 session_date = await current_to_utc(session_date_display, user["timezone"])
-                #session_date = session_date_display
-                #print(f'session_date: {session_date}')
             except:
                 await reply(self.client, interaction, f'Couldn\'t parse that date, sorry. Please check the external module documentation for further information: https://github.com/scrapinghub/dateparser')
                 return

@@ -72,10 +72,10 @@ class SetTimeZone(commands.Cog):
             await create_user_profile(self.client, user_id)
             user = await get_userinfo(user_id)
         
-        # Don't let the user set a decimal timezone
-        if utc_offset % 1 > 0:
-            await reply(self.client, interaction, f'Decimal UTC offsets do not work with the current dateparser module. Please select a whole number UTC offset for now.')
-            return
+        # # Don't let the user set a decimal timezone
+        # if utc_offset % 1 > 0:
+        #     await reply(self.client, interaction, f'Decimal UTC offsets do not work with the current dateparser module. Please select a whole number UTC offset for now.')
+        #     return
         
         user["timezone"] = utc_offset
 
