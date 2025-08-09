@@ -31,8 +31,8 @@ class ResetDay(commands.Cog):
         await reply(self.client, interaction, message)
 
 
-    @app_commands.command(name="getrole", description="Manually check if you can rank up this month (usually done automatically at the end of every day).")
-    async def getrole(self, interaction: discord.Interaction):
+    @app_commands.command(name="rankup", description="Manually check if you can rank up this month (usually done automatically at the end of every day).")
+    async def rankup(self, interaction: discord.Interaction):
         user_id = interaction.user.id
 
         global_info = await get_globalinfo()

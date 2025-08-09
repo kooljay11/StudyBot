@@ -38,10 +38,26 @@ class Stats(commands.Cog):
             target_info = user
             user_name = str(await self.client.fetch_user(user_id))
         
+        global_info = await get_globalinfo()
+
         message = f'__**{user_name}\'s Stats ({mode})**__'
 
         message += f'\nTimezone UTC offset: {target_info["timezone"]}'
         message += f'\nPoints: {target_info["points"]}'
+        
+        message += f'\n All Ranks: '
+        ranks = deepcopy(global_info["monthly_rank"]).__reversed__
+
+        for rank, num in ranks.items():
+            num = 0
+
+        for month in user["months"]:
+            ranks[month["rank"]] += 1
+
+        for rank, num in ranks.items():
+            if num > 0:
+                emoji = global_info["monthly_emojis"][rank]
+                message += f'{emoji} {num} '
 
         if target_info["partner_id"] != 0:
             partner_id_nick = await get_id_nickname(self.client, user, str(target_info["partner_id"]))
@@ -68,7 +84,6 @@ class Stats(commands.Cog):
         message += f'\nDefault session duration (mins): {target_info["default_duration"]}'
         message += f'\n\n'
 
-        global_info = await get_globalinfo()
 
         if mode == "monthly":
             current_month = await get_current_month(target_info)

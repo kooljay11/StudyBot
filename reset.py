@@ -10,6 +10,7 @@ async def reset(client):
     # If it is the start of a new month, remove all current partners and try to give everyone their preferred partners
     if now.day == 1:
         await remove_all_partners()
+        await remove_all_inactive()
         await give_preferred_partners()
 
     # Assemble a list of all the user files as a list of all user ids
@@ -218,6 +219,32 @@ async def remove_all_partners():
 
             user["partner_id"] = 0
             await save_userinfo(user_id, user)
+    return
+
+# Remove all inactive users
+async def remove_all_inactive():
+    index = 0
+    file_list = os.listdir("./data/user_data")
+
+    # Remove any user who has no minutes studied
+    while index < len(file_list):
+        filename = file_list[index]
+        if filename.endswith(".json"):
+            user_id = os.path.splitext(filename)[0]
+            user = await get_userinfo(user_id)
+
+            total_mins = 0
+
+            for month in user["months"]:
+                if month["mins_studied"] > 0:
+                    total_mins = month["mins_studied"]
+                    break
+            
+            if total_mins > 0:
+                index += 1
+            else:
+                os.remove("./data/user_data/" + filename)
+
     return
 
 async def give_preferred_partners():
