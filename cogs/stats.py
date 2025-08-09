@@ -48,7 +48,7 @@ class Stats(commands.Cog):
         
         message += f'\n All Ranks: '
         print(f'user_name: {user_name}')
-        ranks = deepcopy(global_info["monthly_rank"]).__reversed__
+        ranks = dict(reversed(global_info["monthly_rank"].items()))
         print(f'ranks: {ranks}')
 
         for rank, num in ranks.items():
