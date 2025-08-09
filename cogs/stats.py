@@ -50,9 +50,10 @@ class Stats(commands.Cog):
         print(f'user_name: {user_name}')
         ranks = dict(reversed(global_info["monthly_rank"].items()))
         print(f'ranks: {ranks}')
+        ranks.update(dict.fromkeys(ranks, 0))
 
-        for rank, num in ranks.items():
-            num = 0
+        # for rank, num in ranks.items():
+        #     num = 0
 
         for month in user["months"]:
             ranks[month["rank"]] += 1
